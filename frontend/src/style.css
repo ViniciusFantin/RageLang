@@ -1152,3 +1152,164 @@ p {
     scroll-behavior: auto !important;
   }
 }
+
+/* === Rage Comics: extras laterais e vídeo da inspiração === */
+.hero,
+.gallery-section {
+  isolation: isolate;
+}
+.hero-inner,
+.meme-gallery {
+  z-index: 1;
+}
+.gallery-section {
+  position: relative;
+}
+.side-memes {
+  pointer-events: none;
+}
+.side-meme {
+  position: absolute;
+  z-index: 0;
+  width: clamp(125px, 12vw, 195px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0.93;
+  filter: drop-shadow(3px 4px 0 rgba(0, 0, 0, 0.14));
+}
+.side-meme img {
+  max-width: 100%;
+  max-height: 220px;
+  width: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.side-meme span {
+  background: #ffdb00;
+  border: 2px solid #111;
+  box-shadow: 3px 3px #111;
+  padding: 3px 9px;
+  font:
+    600 15px "Oswald",
+    sans-serif;
+  letter-spacing: 1px;
+  transform: rotate(-5deg);
+}
+.side-meme.side-one {
+  top: 365px;
+  left: max(8px, calc(50% - 790px));
+  transform: rotate(-11deg);
+}
+.side-meme.side-two {
+  top: 455px;
+  right: max(8px, calc(50% - 790px));
+  transform: rotate(9deg);
+}
+.side-meme.side-three {
+  top: 300px;
+  left: -165px;
+  transform: rotate(-8deg);
+}
+.side-meme.side-four {
+  top: 315px;
+  right: -165px;
+  transform: rotate(8deg);
+}
+
+.rap-section {
+  max-width: 760px;
+  margin: 68px auto 0;
+  position: relative;
+  z-index: 2;
+}
+.rap-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+.rap-heading span {
+  display: inline-block;
+  padding: 6px 9px;
+  border: 2px solid #111;
+  background: #ffdf00;
+  transform: rotate(-3deg);
+  font:
+    600 12px "Oswald",
+    sans-serif;
+}
+.rap-heading b {
+  font:
+    600 clamp(23px, 3vw, 34px) "Oswald",
+    sans-serif;
+  letter-spacing: 1px;
+}
+.rap-heading small {
+  font:
+    600 12px "Oswald",
+    sans-serif;
+  color: #d90023;
+}
+.rap-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #17191e;
+  border: 4px solid #111;
+  box-shadow: 7px 8px #111;
+}
+.rap-video iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.rap-section p {
+  font-size: 14px;
+  margin: 16px 0 0;
+}
+.rap-section a {
+  color: #cc0020;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hero-cta {
+  margin-top: 46px;
+}
+.docs-section,
+.about-section,
+.playground-section {
+  scroll-margin-top: 18px;
+}
+
+@media (max-width: 1550px) {
+  .side-meme.side-three,
+  .side-meme.side-four {
+    display: none;
+  }
+}
+@media (max-width: 1380px) {
+  .side-memes-hero {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .rap-section {
+    margin-top: 46px;
+  }
+  .rap-heading small {
+    width: 100%;
+  }
+  .rap-video {
+    border-width: 3px;
+    box-shadow: 4px 5px #111;
+  }
+  .hero-cta {
+    margin-top: 38px;
+  }
+}

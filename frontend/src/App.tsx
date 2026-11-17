@@ -1,10 +1,10 @@
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
-  type RefObject,
 } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import {
@@ -77,9 +77,16 @@ function Header({
 }) {
   const [open, setOpen] = useState(false);
   const choose = (p: Page) => {
-    setPage(p);
     setOpen(false);
-    if (p === "playground") onGo();
+    if (p === "playground") {
+      onGo();
+    } else if (p === page) {
+      document
+        .getElementById(p === "docs" ? "docs" : "about")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      setPage(p);
+    }
   };
   return (
     <header className="topbar">
@@ -133,6 +140,82 @@ function Header({
   );
 }
 
+// Memes decorativos: as imagens podem ser trocadas em public/memes/side/.
+function SideMemes({ area }: { area: "hero" | "gallery" }) {
+  const stickers =
+    area === "hero"
+      ? [
+          {
+            file: "fuck-yea",
+            caption: "FUCK YEA!",
+            side: "left",
+            placement: "one",
+          },
+          {
+            file: "troll-stick",
+            caption: "PROBLEM?",
+            side: "right",
+            placement: "two",
+          },
+        ]
+      : [
+          {
+            file: "derpina",
+            caption: "ME GUSTA!",
+            side: "left",
+            placement: "three",
+          },
+          {
+            file: "troll-dark",
+            caption: "U MAD BRO?",
+            side: "right",
+            placement: "four",
+          },
+        ];
+  return (
+    <div className={`side-memes side-memes-${area}`} aria-hidden="true">
+      {stickers.map((m) => (
+        <div key={m.file} className={`side-meme ${m.side} side-${m.placement}`}>
+          <img src={`/memes/side/${m.file}.webp`} alt="" loading="lazy" />
+          <span>{m.caption}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RapDosMemes() {
+  return (
+    <section className="rap-section" aria-label="Rap dos Memes de Cauê Moura">
+      <div className="rap-heading">
+        <span>♫ PLAYLIST DA NOSTALGIA</span>
+        <b>RAP DOS MEMES</b>
+        <small>CAUÊ MOURA • A INSPIRAÇÃO</small>
+      </div>
+      <div className="rap-video">
+        <iframe
+          title="Cauê Moura — Rap dos Memes (YouTube)"
+          src="https://www.youtube-nocookie.com/embed/YtpATpMKDkg"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+      </div>
+      <p>
+        O som que inspirou a linguagem.{" "}
+        <a
+          href="https://www.youtube.com/watch?v=YtpATpMKDkg"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Assistir diretamente no YouTube ↗
+        </a>
+      </p>
+    </section>
+  );
+}
+
 function Hero({
   onStart,
   onDocs,
@@ -142,6 +225,7 @@ function Hero({
 }) {
   return (
     <section className="hero graphpaper" id="top">
+      <SideMemes area="hero" />
       <div className="hero-inner">
         <div className="est-stamp">EST. 2008 • 4CHAN /B/ • FACEBOOK MEMES</div>
         <h1>
@@ -177,6 +261,7 @@ function Hero({
           </div>
           <div className="poster-scribble">PROBLEM? ☺</div>
         </div>
+        <RapDosMemes />
         <div className="hero-cta">
           <button className="comic-btn red" onClick={onStart}>
             PROGRAMAR AGORA <ArrowDown size={17} />
@@ -203,6 +288,7 @@ function Hero({
 function MemeGallery() {
   return (
     <section className="gallery-section" aria-labelledby="gallery-title">
+      <SideMemes area="gallery" />
       <div className="section-label">THE ORIGINAL GANG — CIRCA 2008</div>
       <h2 id="gallery-title" className="comic-heading">
         OS ROSTOS DA <em>RAGELANG</em>
@@ -246,7 +332,6 @@ function Playground({
   action,
   mode,
   setMode,
-  bottomRef,
   onMount,
 }: {
   service: "checking" | "online" | "offline";
@@ -262,13 +347,19 @@ function Playground({
   action: (a: Action) => void;
   mode: "console" | "csharp";
   setMode: (m: "console" | "csharp") => void;
-  bottomRef: RefObject<HTMLDivElement | null>;
   onMount: OnMount;
 }) {
   const [sidebar, setSidebar] = useState(false);
   const [localLogs, setLocalLogs] = useState<Log[] | null>(null);
+  const terminalRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => setLocalLogs(null), [logs]);
   const shownLogs = localLogs ?? logs;
+  // Rolagem restrita ao terminal: nunca altera o scroll da página.
+  useEffect(() => {
+    if (mode === "console" && terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [shownLogs, mode]);
   const lines = useMemo(() => source.split("\n").length, [source]);
   const saveSource = () => {
     const url = URL.createObjectURL(new Blob([source], { type: "text/plain" }));
@@ -446,7 +537,7 @@ function Playground({
             </button>
           </div>
           {mode === "console" ? (
-            <div className="terminalbody">
+            <div className="terminalbody" ref={terminalRef}>
               {shownLogs.map((l, i) => (
                 <div className={`log log-${l.type}`} key={i}>
                   <span>
@@ -459,7 +550,6 @@ function Playground({
                   <pre>{l.content}</pre>
                 </div>
               ))}
-              <div ref={bottomRef} />
             </div>
           ) : (
             <div className="csharpbody">
@@ -579,7 +669,7 @@ function About() {
     ],
   ];
   return (
-    <section className="about-section">
+    <section className="about-section" id="about">
       <div className="section-label">THE LORE BEHIND THE CODE</div>
       <h2 className="comic-heading">
         COMO NASCEU A <em>RAGELANG?</em>
@@ -650,7 +740,35 @@ export default function App() {
   const [service, setService] = useState<"checking" | "online" | "offline">(
     "checking",
   );
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  // Evita a restauração automática da posição antiga ao reabrir a página.
+  useLayoutEffect(() => {
+    const previous = history.scrollRestoration;
+    history.scrollRestoration = "manual";
+    const old = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+    const frame = requestAnimationFrame(() => {
+      document.documentElement.style.scrollBehavior = old;
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      history.scrollRestoration = previous;
+      document.documentElement.style.scrollBehavior = old;
+    };
+  }, []);
+  const lastPage = useRef<Page>(page);
+  useEffect(() => {
+    if (lastPage.current === page) return;
+    lastPage.current = page;
+    const id =
+      page === "docs" ? "docs" : page === "about" ? "about" : "workspace";
+    const frame = requestAnimationFrame(() =>
+      document
+        .getElementById(id)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [page]);
   useEffect(() => {
     let cancelled = false;
     fetch(`${API}/api/health`)
@@ -665,20 +783,13 @@ export default function App() {
       cancelled = true;
     };
   }, []);
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [logs]);
+
   function scrollToWorkspace() {
-    setPage("playground");
-    requestAnimationFrame(() =>
-      setTimeout(
-        () =>
-          document
-            .getElementById("workspace")
-            ?.scrollIntoView({ behavior: "smooth" }),
-        0,
-      ),
-    );
+    if (page !== "playground") setPage("playground");
+    else
+      document
+        .getElementById("workspace")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   function selectExample(k: ExampleKey) {
     setActive(k);
@@ -832,7 +943,6 @@ export default function App() {
               action={submit}
               mode={mode}
               setMode={setMode}
-              bottomRef={bottomRef}
               onMount={handleMount}
             />
           </>
